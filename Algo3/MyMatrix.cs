@@ -301,5 +301,64 @@ namespace Algo3
                 this[i, i] = this[i, i] / (dynamic)this[i, i]; // zapisanie współczynnika równania w macierzy
             }
         }
+
+        private double SumNonLeadingElements(T[] vector, int row)
+        {
+            var result = 0.0;
+
+            for(var col = 0; col < Columns(); col++)
+            {
+                if (col != row)
+                {
+                    result += (dynamic)this[row, col] * vector[col];
+                }
+            }
+
+            return result;
+        }
+
+        private double Approximate(T[] bVector, T[] xVector, int row)
+        {
+            var nonLeadingElementsSum = SumNonLeadingElements(xVector, row);
+            var leadingElement = this[row, row];
+
+            var Approximation = ((dynamic)bVector[row] - nonLeadingElementsSum) / leadingElement;
+            return Approximation;
+        }
+
+        public void Jacobi(T[] bVector, int iter)
+        {
+            var xVector = new T[Columns()];
+            for(var it = 0; it < iter; it++)
+            {
+                var xVectorPrevious = (T[])xVector.Clone();
+                for(var row = 0; row < Rows(); row++)
+                {
+                    xVector[row] = (dynamic)Approximate(bVector, xVectorPrevious, row);
+                }
+            }
+
+            for (var i = 0; i <Rows(); i++)
+            {
+                bVector[i] = xVector[i];
+            }
+        }
+
+        public void Seidel(T[] bVector, int iter)
+        {
+            var xVector = new T[Columns()];
+            for (var it = 0; it < iter; it++)
+            {   
+                for (var row = 0; row < Rows(); row++)
+                {
+                    xVector[row] = (dynamic)Approximate(bVector, xVector, row);
+                }
+            }
+
+            for (var i = 0; i < Rows(); i++)
+            {
+                bVector[i] = xVector[i];
+            }
+        }
     }
 }
