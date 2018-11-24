@@ -97,6 +97,13 @@ namespace Algo3
             CalculateVector(vector);
         }
 
+        public void GaussPartialPivotSparse(T[] vector)
+        {
+            LeftBottomTrianglePartialPivotSprarse(vector);
+            RightTopTriangle(vector);
+            CalculateVector(vector);
+        }
+
         public void GaussFullPivot(T[] vector)
         {
             // Wstępne ustalenie który x znajduje się w której kolumnie
@@ -223,6 +230,25 @@ namespace Algo3
                 //redukowanie rzędów poniżej
                 for (var current = selected + 1; current < Rows(); current++)
                 {
+                    ReduceRow(vector, selected, current);
+                }
+            }
+        }
+
+        public void LeftBottomTrianglePartialPivotSprarse(T[] vector)
+        {
+            //wybranie rzędu do redukowania rzędów poniżej
+            for (var selected = 0; selected < Rows() - 1; selected++)
+            {
+                NoLeadingZero(selected);
+                ChoosePartialPivot(vector, selected);
+
+                //redukowanie rzędów poniżej
+                for (var current = selected + 1; current < Rows(); current++)
+                {
+                    if ((dynamic)this[current, selected] == new T())
+                        continue;
+
                     ReduceRow(vector, selected, current);
                 }
             }
