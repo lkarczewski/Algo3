@@ -37,7 +37,13 @@ namespace Algo3
 
             Test test = new Test();
 
-            test.MonteCarlo(1, 4, 2);
+            bool result = test.MonteCarlo(100000, 500, 300);
+
+            if (result)
+                Console.WriteLine("Znaleziono!");
+            else
+                Console.WriteLine("NIE DEBILE TE AGENTY!");
+
         }
     }
 
