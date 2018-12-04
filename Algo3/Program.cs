@@ -37,13 +37,22 @@ namespace Algo3
 
             Test test = new Test();
 
-            bool result = test.MonteCarlo(100000, 500, 300);
+            int win = 0;
+            int loose = 0;
+            int iterations = 1000000;
+            bool result;
 
-            if (result)
-                Console.WriteLine("Znaleziono!");
-            else
-                Console.WriteLine("NIE DEBILE TE AGENTY!");
+            for(int i = 0; i < iterations; i++)
+            {
+                result = test.MonteCarlo(20, 5, 5);
+                if (result)
+                    win++;
+                else
+                    loose++;
+            }
 
+            Console.WriteLine("Wygrane:" + win);
+            Console.WriteLine("Przegrane:" + loose);
         }
     }
 

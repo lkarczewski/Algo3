@@ -8,6 +8,8 @@ namespace Algo3
 {
     class Test
     {
+        private Random rnd = new Random();
+
         public double[] GenerateRandomVector(int size)
         {
             Random _random = new Random();
@@ -25,7 +27,7 @@ namespace Algo3
 
         public void PrintVector(double[] vector)
         {
-            for (var i = 0; i<vector.Length; i++)
+            for (var i = 0; i < vector.Length; i++)
             {
                 Console.WriteLine(vector[i]);
             }
@@ -48,34 +50,35 @@ namespace Algo3
             double[] vector = new double[size];
         }
 
-        public bool MonteCarlo(int numberOfIterations, int numOfAgents,int numOfYes)
+        public bool MonteCarlo(int numOfAgents, int numOfYes, int numOfNo)
         {
-            int[] tableOfAgents = GenerateRandomTableOfAgents(numOfAgents, numOfYes);
-            var r = new Random();
+            int[] tableOfAgents = GenerateRandomTableOfAgents(numOfAgents, numOfYes, numOfNo);
+            //var r = new Random();
 
-            //Console.WriteLine();
-            List<PairOfAgents> listOfPairs = DrawPairOfAgents(numOfAgents, tableOfAgents);
+            //List<PairOfAgents> listOfPairs = DrawPairOfAgents(numOfAgents, tableOfAgents);
 
-            //Console.WriteLine("Pairs of agents:");
-            //foreach (PairOfAgents i in listOfPairs)
+            //Console.WriteLine("Agents ");
+            //for (int k = 0; k < tableOfAgents.Length; k++)
             //{
-            //    Console.WriteLine("First agent: " + i.firstAgent + "\t\tSecond agent: " + i.secondAgent + 
-            //        "\t\tFirst index: " + i.firstAgentIndex + "\t\tSecond index: " + i.secondAgentIndex);
+            //    Console.Write(tableOfAgents[k] + " ");
             //}
 
-            Console.WriteLine("Agents ");
-            for (int k = 0; k < tableOfAgents.Length; k++)
+            int i = 1;
+            do
             {
-                Console.Write(tableOfAgents[k] + " ");
-            }
+                //PairOfAgents picked = listOfPairs.ElementAt(r.Next(0, listOfPairs.Count));
+                PairOfAgents picked = Draw(tableOfAgents);
+                //Console.Write(picked.firstAgent + " ");
+                //Console.Write(picked.secondAgent + "; ");
 
+                //for (int k = 0; k < tableOfAgents.Length; k++)
+                //{
+                //    Console.Write(tableOfAgents[k] + " ");
+                //}
 
-            for (int i = 0; i < numberOfIterations; i++)
-            {
+                //Console.WriteLine();
 
-                PairOfAgents picked = listOfPairs.ElementAt(r.Next(0, listOfPairs.Count));
-
-                if ((picked.firstAgent == 1 && picked.secondAgent == 0 ) || (picked.firstAgent == 0 && picked.secondAgent == 1))
+                if ((picked.firstAgent == 1 && picked.secondAgent == 0) || (picked.firstAgent == 0 && picked.secondAgent == 1))
                 {
                     if (picked.firstAgent == 0)
                         tableOfAgents[picked.firstAgentIndex] = 1;
@@ -95,38 +98,74 @@ namespace Algo3
                         tableOfAgents[picked.secondAgentIndex] = -1;
                 }
 
-                Console.WriteLine("Agents " + i);
-                //for (int k = 0; k < tableOfAgents.Length; k++)
-                //{
-                //    Console.Write(tableOfAgents[k] + " ");
-                //}
-
-
-                bool checkAllAgentsYes = checkAgents(tableOfAgents);
-
-                if (checkAllAgentsYes)
+                int score = checkAgentsWinLose(tableOfAgents);
+                if (score == 1)
+                {
                     return true;
+                }
+                else if (score == -1)
+                    return false;
 
-                listOfPairs = DrawPairOfAgents(numOfAgents, tableOfAgents);
+                i++;
             }
-
-            return false;
+            while (true);
         }
 
-        public bool checkAgents(int[] tableOfAgents)
+        public int checkAgentsWinLose(int[] tableOfAgents)
         {
-            for (int j = 0; j < tableOfAgents.Length; j++)
+
+            if (checkAgentsYes(tableOfAgents))
             {
-                if (tableOfAgents[j] == -1 || tableOfAgents[j] == 0)
+                //wygrana, wszyscy na tak
+                return 1;
+            }
+            else if (checkAgentsNo(tableOfAgents))
+            {
+                //przegrana, wszyscy na nie lub nie wiem
+                return -1;
+            }
+            else
+                //graj dalej
+                return 0;
+        }
+
+        public bool checkAgentsYes(int[] tableOfAgents)
+        {
+            for (int i = 0; i < tableOfAgents.Length; i++)
+            {
+                if (tableOfAgents[i] != 1)
                     return false;
             }
 
             return true;
         }
 
-        public int[] GenerateRandomTableOfAgents(int numberOfAgents, int numberOfYes)
+        public bool checkAgentsNo(int[] tableOfAgents)
         {
-            int numberOfNo = numberOfYes / 2;
+            for(int i = 0; i < tableOfAgents.Length; i++)
+            {
+                if (tableOfAgents[i] != -1)
+                {
+                    break;
+                }
+
+                if (i == tableOfAgents.Length - 1)
+                {
+                    return true;
+                }
+            }
+            
+            for (int i = 0; i < tableOfAgents.Length; i++)
+            {
+                if (tableOfAgents[i] != 0)
+                    return false;
+            }
+
+            return true;
+        }
+
+        public int[] GenerateRandomTableOfAgents(int numberOfAgents, int numberOfYes, int numberOfNo)
+        {
             int numberOfUn = numberOfAgents - numberOfNo - numberOfYes;
             int[] table = new int[numberOfAgents];
 
@@ -151,7 +190,7 @@ namespace Algo3
             return table;
         }
 
-        public struct PairOfAgents
+        public class PairOfAgents
         {
             public int firstAgent;
             public int secondAgent;
@@ -167,26 +206,41 @@ namespace Algo3
             }
         }
 
-        public List<PairOfAgents> DrawPairOfAgents(int numberOfAgents, int[] tableOfAgents)
+        public PairOfAgents Draw(int[] tableOfAgents)
         {
-            //wylosuj z rand parę agentów (przedział 0...n/2)
-            // int[] tableOfAgents = GenerateRandomTableOfAgents(numberOfAgents,18);
-            double probability = (2 / (numberOfAgents * (numberOfAgents - 1)));
-            int[,] tableOfPairs = new int[numberOfAgents/2,4];
-            List<PairOfAgents> listOfPairs = new List<PairOfAgents>();
-            int k = 0;
+            int first = rnd.Next(0, tableOfAgents.Length); ;
+            int second;
 
-            for (int i = 0; i < numberOfAgents; i++)
+            do
             {
-                for (int j = i + 1; j < numberOfAgents; j++)
-                {
-                    PairOfAgents n = new PairOfAgents(tableOfAgents[i], tableOfAgents[j], i, j);
-                    listOfPairs.Add(n);
-                    k++;
-                }
+                second = rnd.Next(0, tableOfAgents.Length);
             }
+            while (second == first);
 
-            return listOfPairs;
+            PairOfAgents p = new PairOfAgents(tableOfAgents[first], tableOfAgents[second], first, second);
+            return p;
         }
+
+        //public List<PairOfAgents> DrawPairOfAgents(int numberOfAgents, int[] tableOfAgents)
+        //{
+        //    //wylosuj z rand parę agentów (przedział 0...n/2)
+        //    // int[] tableOfAgents = GenerateRandomTableOfAgents(numberOfAgents,18);
+        //    //double probability = (2 / (numberOfAgents * (numberOfAgents - 1)));
+        //    int[,] tableOfPairs = new int[numberOfAgents/2,4];
+        //    List<PairOfAgents> listOfPairs = new List<PairOfAgents>();
+        //    int k = 0;
+
+        //    for (int i = 0; i < numberOfAgents; i++)
+        //    {
+        //        for (int j = i + 1; j < numberOfAgents; j++)
+        //        {
+        //            PairOfAgents n = new PairOfAgents(tableOfAgents[i], tableOfAgents[j], i, j);
+        //            listOfPairs.Add(n);
+        //            k++;
+        //        }
+        //    }
+
+        //    return listOfPairs;
+        //}
     }
 }
