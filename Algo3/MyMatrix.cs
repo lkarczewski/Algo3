@@ -83,13 +83,6 @@ namespace Algo3
             return Math.Sqrt(sum);
         }
 
-        public void GaussWithoutPivot(T[] vector) //obiekt ma w sobie macierz, ale nie posiada wektora
-        {
-            LeftBottomTriangle(vector); //redukcja lewego dolnego trójkąta
-            RightTopTriangle(vector);   //redukcja prawego górnego trójkąta
-            CalculateVector(vector); // obliczanie wektora
-        }
-
         public void GaussPartialPivot(T[] vector)
         {
             LeftBottomTrianglePartialPivot(vector);
@@ -99,49 +92,9 @@ namespace Algo3
 
         public void GaussPartialPivotSparse(T[] vector)
         {
-            LeftBottomTrianglePartialPivotSprarse(vector);
-            RightTopTriangle(vector);
+            LeftBottomTrianglePartialPivotSparse(vector);
+            RightTopTrianglePartialPivotSparse(vector);
             CalculateVector(vector);
-        }
-
-        public void GaussFullPivot(T[] vector)
-        {
-            // Wstępne ustalenie który x znajduje się w której kolumnie
-            //ustalenie porządku kolumn
-            var columnOrder = new int[Columns()];
-            for (var i = 0; i < Columns(); i++)
-            {
-                columnOrder[i] = i;
-            }
-
-            LeftBottomTriangleFullPivot(vector, columnOrder);
-            RightTopTriangle(vector);
-            CalculateVector(vector);
-
-            //przywrócenie porządku kolumn
-            // Tutaj bierze indeksy z columnOrder
-            // a columnOrder[i] przechowuje indeks aktualnego x bo w vector teraz to x-sy są pomieszane a nie w koljensności x1,x2....
-            // a tu posortowany vector przepisuje do głównej zmiennej wektora
-            var orderedVector = new T[Columns()];
-            for (var i = 0; i < Columns(); i++)
-                orderedVector[columnOrder[i]] = vector[i];
-
-            for (var i = 0; i < Columns(); i++)
-                vector[i] = orderedVector[i];
-        }
-
-        public void LeftBottomTriangle(T[] vector)
-        {
-            //wybieranie rzędu do zredukowania rzędów poniżej; selected to wiersz, którym będę odejmował;
-            for (var selected = 0; selected < Rows() - 1; selected++)
-            {
-                NoLeadingZero(selected);
-                //pętla na każdym rzędie poniżej; current to wiersz, który będzie redukowany
-                for (var current = selected + 1; current < Rows(); current++)
-                {
-                    ReduceRow(vector, selected, current);
-                }
-            }
         }
 
         public void SwapRow(int index1, int index2)
@@ -168,14 +121,15 @@ namespace Algo3
         {
             //wybrany rząd ustawiony jako obecny max
             var currentMaxRowIndex = selected;
-            var currentMax = this[selected, selected];
+            double currentMax = (dynamic)this[selected, selected];
 
             //sprawdzanie każdego rzędu poniżej wybranego(selected)
             for (var i = selected; i < Rows(); i++)
             {
-                if (this[i, selected] > (dynamic)currentMax)
+                if (this[i, selected] > Math.Abs((dynamic)currentMax))
                 {
-                    currentMax = this[i, selected];
+                    currentMax = (dynamic)this[i, selected];
+                    currentMax = Math.Abs(currentMax);
                     currentMaxRowIndex = i;
                 }
             }
@@ -235,20 +189,21 @@ namespace Algo3
             }
         }
 
-        public void LeftBottomTrianglePartialPivotSprarse(T[] vector)
+        public void LeftBottomTrianglePartialPivotSparse(T[] vector)
         {
             //wybranie rzędu do redukowania rzędów poniżej
             for (var selected = 0; selected < Rows() - 1; selected++)
             {
                 NoLeadingZero(selected);
                 ChoosePartialPivot(vector, selected);
-
                 //redukowanie rzędów poniżej
                 for (var current = selected + 1; current < Rows(); current++)
                 {
                     if ((dynamic)this[current, selected] == new T())
+                    {
                         continue;
-
+                    }
+                       
                     ReduceRow(vector, selected, current);
                 }
             }
@@ -288,6 +243,27 @@ namespace Algo3
                 NoLeadingZero(selected);
                 for (var current = selected - 1; current >= 0; current--)
                 {
+                    ReduceRow(vector, selected, current);
+                }
+            }
+        }
+
+        public void RightTopTrianglePartialPivotSparse(T[] vector)
+        {
+            // select last row that will be used to reduce rows above it
+            for (var selected = Rows() - 1; selected >= 1; selected--)
+            {
+                NoLeadingZero(selected);
+
+                // loop on each row above selected row
+                for (var current = selected - 1; current >= 0; current--)
+                {
+                    // row already reduced
+                    if ((dynamic)this[current, selected] == new T())
+                    {
+                        continue;
+                    }
+
                     ReduceRow(vector, selected, current);
                 }
             }
@@ -385,6 +361,61 @@ namespace Algo3
             {
                 bVector[i] = xVector[i];
             }
+        }
+
+        public int SeidelAccuracy(T[] bVector, double accuracy)
+        {
+            var xVector = new T[Columns()];
+            var enoughAccurracy = false;
+            int iterations = 0;
+
+            while(!enoughAccurracy)
+            {
+                var xVectorFromPreviousIteration = (T[])xVector.Clone();
+
+                for (var row = 0; row < Rows(); row++)
+                {
+                    xVector[row] = (dynamic)Approximate(bVector, xVector, row);
+                }
+
+                enoughAccurracy = Math.Abs(VectorNorm(xVector, xVectorFromPreviousIteration)) <= accuracy / 10;
+                iterations++;
+            }
+
+            for (var i = 0; i < Rows(); i++)
+            {
+                bVector[i] = xVector[i];
+            }
+
+            return iterations;
+        }
+
+        public int JacobiAccuracy(T[] bVector, double accuracy)
+        {
+            var xVector = new T[Columns()];
+            var enoughAccurracy = false;
+            int iterations = 0;
+
+            while(!enoughAccurracy)
+            {
+                var xVectorFromPreviousIteration = (T[])xVector.Clone();
+
+                var xVectorPrevious = (T[])xVector.Clone();
+                for (var row = 0; row < Rows(); row++)
+                {
+                    xVector[row] = (dynamic)Approximate(bVector, xVectorPrevious, row);
+                }
+
+                enoughAccurracy = Math.Abs(VectorNorm(xVector, xVectorFromPreviousIteration)) <= accuracy / 10;
+                iterations++;
+            }
+
+            for (var i = 0; i < Rows(); i++)
+            {
+                bVector[i] = xVector[i];
+            }
+
+            return iterations;
         }
     }
 }

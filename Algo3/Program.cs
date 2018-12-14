@@ -10,6 +10,9 @@ namespace Algo3
     {
         static void Main(string[] args)
         {
+            Test t = new Test();
+            //t.GaussPartialPivotTest(3,1000);
+
             //double[,] test = new double[3, 3] { { 8, -2, 3 }, { 2, 3, -1 }, { 5, -2, 7 } };
             //double[] vector = new double[] { 28.6, 12.12, 36.95 };
             //MyMatrix<double> macierz1 = new MyMatrix<double>(test);
@@ -35,24 +38,39 @@ namespace Algo3
             //}
             //Console.WriteLine();
 
-            Test test = new Test();
+            //Test test = new Test();
+            //int win = 0;
+            //int loose = 0;
+            //int iterations = 1000000;
+            //bool result;
 
-            int win = 0;
-            int loose = 0;
-            int iterations = 1000000;
-            bool result;
+            //for (int i = 0; i < iterations; i++)
+            //{
+            //    result = test.MonteCarlo(5, 2, 2);
+            //    if (result)
+            //        win++;
+            //    else
+            //        loose++;
+            //}
 
-            for(int i = 0; i < iterations; i++)
-            {
-                result = test.MonteCarlo(20, 5, 5);
-                if (result)
-                    win++;
-                else
-                    loose++;
-            }
+            //Console.WriteLine("Wygrane:" + win);
+            //Console.WriteLine("Przegrane:" + loose);
 
-            Console.WriteLine("Wygrane:" + win);
-            Console.WriteLine("Przegrane:" + loose);
+            MatrixGenerator mg = new MatrixGenerator(15);
+            MyMatrix<double> macierz = new MyMatrix<double>(mg.size, mg.size);
+            double[] wektor = new double[mg.size];
+
+            macierz = mg.GenerateMatrix();
+            wektor = t.GenerateVector(mg.size);
+
+            //Console.WriteLine(macierz.SeidelAccuracy(wektor, 1e-6));
+
+            //macierz.PrintMatrix();
+            macierz.GaussPartialPivot(wektor);
+            //Console.WriteLine();
+            //macierz.PrintMatrix();
+            //Console.WriteLine();
+            t.PrintVector(wektor);
         }
     }
 
