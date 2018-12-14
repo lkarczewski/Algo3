@@ -199,7 +199,7 @@ namespace Algo3
                 //redukowanie rzędów poniżej
                 for (var current = selected + 1; current < Rows(); current++)
                 {
-                    if ((dynamic)this[current, selected] == new T())
+                    if ((dynamic)this[current, selected] == 0.0)
                     {
                         continue;
                     }
@@ -259,7 +259,7 @@ namespace Algo3
                 for (var current = selected - 1; current >= 0; current--)
                 {
                     // row already reduced
-                    if ((dynamic)this[current, selected] == new T())
+                    if ((dynamic)this[current, selected] == 0.0)
                     {
                         continue;
                     }
@@ -277,10 +277,6 @@ namespace Algo3
 
         private void ReduceRow(T[] vector, int selected, int current)
         {
-            //jeśli wybrany rząd jest zredukowany, return
-            if (this[current, selected] == (dynamic)new T())
-                return;
-
             //współczynnik do wyzerowania rzędu
             var scalar = this[current, selected] / (dynamic)this[selected, selected];
 

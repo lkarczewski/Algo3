@@ -33,7 +33,7 @@ namespace Algo3
             return vector;
         }
 
-        public void GaussPartialPivotTest(int numberOfAgents, int count)
+        public void GaussPartialPivotTimeTest(int numberOfAgents, int count)
         {
             MatrixGenerator mg = new MatrixGenerator(numberOfAgents);
 
@@ -43,50 +43,138 @@ namespace Algo3
             double[] wektorKopia = new double[mg.size];
 
             //przygotowanie macierzy i wektorów
-            macierz = macierzKopia = mg.GenerateMatrix();
-            wektor = wektorKopia = GenerateVector(mg.size);
-
-            macierz.PrintMatrix();
-            Console.WriteLine();
-            macierzKopia.PrintMatrix();
+            macierz = mg.GenerateMatrix();
+            macierzKopia = mg.GenerateMatrix();
+            wektor = GenerateVector(mg.size);
+            wektorKopia = GenerateVector(mg.size);
 
             //liczenie czasu
-            //double[] czasy = new double[count];
-            //double suma = 0.0;
-            //double srednia = 0.0;
+            double[] czasy = new double[count];
+            double suma = 0.0;
+            double srednia = 0.0;
 
-            //for (int i = 0; i < count; i++)
-            //{
-            //    var watchDouble = Stopwatch.StartNew();
-            macierz.GaussPartialPivot(wektor);
-            macierz.PrintMatrix();
-            Console.WriteLine();
-            macierzKopia.PrintMatrix();
-            //    watchDouble.Stop();
-            //    var elapsedMsDouble = watchDouble.ElapsedMilliseconds;
-            //    czasy[i] = elapsedMsDouble;
+            for (int i = 0; i < count; i++)
+            {
+                var watchDouble = Stopwatch.StartNew();
+                macierz.GaussPartialPivot(wektor);
+                watchDouble.Stop();
+                var elapsedMsDouble = watchDouble.ElapsedMilliseconds;
+                czasy[i] = elapsedMsDouble;
 
-            //    for (var j = 0; j < macierz.Rows(); j++)
-            //    {
-            //        for (var k = 0; k < macierz.Columns(); k++)
-            //        {
-            //            macierz[j, k] = macierzKopia[j, k];
-            //            wektor[j] = wektorKopia[j];
-            //        }
-            //    }
-            //    suma += czasy[i];
-            //}
+                for (var j = 0; j < macierz.Rows(); j++)
+                {
+                    for (var k = 0; k < macierz.Columns(); k++)
+                    {
+                        macierz[j, k] = macierzKopia[j, k];
+                        wektor[j] = wektorKopia[j];
+                    }
+                }
+                suma += czasy[i];
+            }
 
-            //srednia = suma / count;
+            srednia = suma / count;
 
-            //StreamWriter writer = new StreamWriter("CzasGaussPartialPivot.csv", append: true);
-            //if (writer != null)
-            //{
-            //    writer.WriteLine(String.Format(mg.size + ";" + srednia + ";"));
-            //}
-            //writer.Close();
+            StreamWriter writer = new StreamWriter("CzasGaussPartialPivot.csv", append: true);
+            if (writer != null)
+            {
+                writer.WriteLine(String.Format(numberOfAgents + ";" + srednia + ";"));
+            }
+            writer.Close();
 
-            //Console.WriteLine("Średni czas GaussPartialPivot: " + srednia + "ms");
+            Console.WriteLine("Średni czas GaussPartialPivot: " + srednia + "ms");
+        }
+
+        public void GaussPartialPivotSparseTimeTest(int numberOfAgents, int count)
+        {
+            MatrixGenerator mg = new MatrixGenerator(numberOfAgents);
+
+            MyMatrix<double> macierz = new MyMatrix<double>(mg.size, mg.size);
+            MyMatrix<double> macierzKopia = new MyMatrix<double>(mg.size, mg.size);
+            double[] wektor = new double[mg.size];
+            double[] wektorKopia = new double[mg.size];
+
+            //przygotowanie macierzy i wektorów
+            macierz = mg.GenerateMatrix();
+            macierzKopia = mg.GenerateMatrix();
+            wektor = wektorKopia = GenerateVector(mg.size);
+
+            //liczenie czasu
+            double[] czasy = new double[count];
+            double suma = 0.0;
+            double srednia = 0.0;
+
+            for (int i = 0; i < count; i++)
+            {
+                var watchDouble = Stopwatch.StartNew();
+                macierz.GaussPartialPivotSparse(wektor);
+                watchDouble.Stop();
+                var elapsedMsDouble = watchDouble.ElapsedMilliseconds;
+                czasy[i] = elapsedMsDouble;
+
+                for (var j = 0; j < macierz.Rows(); j++)
+                {
+                    for (var k = 0; k < macierz.Columns(); k++)
+                    {
+                        macierz[j, k] = macierzKopia[j, k];
+                        wektor[j] = wektorKopia[j];
+                    }
+                }
+                suma += czasy[i];
+            }
+
+            srednia = suma / count;
+
+            StreamWriter writer = new StreamWriter("CzasGaussPartialPivotSparse.csv", append: true);
+            if (writer != null)
+            {
+                writer.WriteLine(String.Format(numberOfAgents + ";" + srednia + ";"));
+            }
+            writer.Close();
+
+            Console.WriteLine("Średni czas GaussPartialPivotSparse: " + srednia + "ms");
+        }
+
+        public void JacobiTimeTest(int numberOfAgents, int count, int accuracy)
+        {
+            MatrixGenerator mg = new MatrixGenerator(numberOfAgents);
+
+            MyMatrix<double> macierz = new MyMatrix<double>(mg.size, mg.size);
+            double[] wektor = new double[mg.size];
+
+
+            //przygotowanie macierzy i wektorów
+            macierz = mg.GenerateMatrix();
+            wektor = GenerateVector(mg.size);
+
+            //liczenie czasu
+            double[] czasy = new double[count];
+            double suma = 0.0;
+            double srednia = 0.0;
+
+            for (int i = 0; i < count; i++)
+            {
+                var watchDouble = Stopwatch.StartNew();
+                macierz.JacobiAccuracy(wektor,accuracy);
+                watchDouble.Stop();
+                var elapsedMsDouble = watchDouble.ElapsedMilliseconds;
+                czasy[i] = elapsedMsDouble;
+
+                suma += czasy[i];
+                wektor = GenerateVector(mg.size);
+            }
+
+            srednia = suma / count;
+
+            string name = "CzasJacobi" + accuracy + ".csv";
+
+            StreamWriter writer = new StreamWriter(name, append: true);
+            if (writer != null)
+            {
+                writer.WriteLine(String.Format(numberOfAgents + ";" + srednia + ";"));
+            }
+            writer.Close();
+
+            Console.WriteLine("Średni czas Jacobi " + accuracy + ": " + srednia + "ms");
         }
     }
 }
