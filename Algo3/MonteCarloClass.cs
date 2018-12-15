@@ -26,8 +26,10 @@ namespace Algo3
     {
         private Random rnd = new Random();
 
-        public bool MonteCarlo(int numberOfAgents, int numberOfYes, int numberOfNo)
+        public bool MonteCarlo(int numberOfAgents)
         {
+            int numberOfYes = numberOfAgents / 2;
+            int numberOfNo = numberOfAgents / 2;
             int[] tableOfAgents = GenerateRandomTableOfAgents(numberOfAgents, numberOfYes, numberOfNo);
             int i = 1;
 

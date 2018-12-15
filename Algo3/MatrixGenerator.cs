@@ -152,6 +152,7 @@ namespace Algo3
                 for (int j = 0; j <= numberOfAgents - i; j++)
                 {
                     Keys.Add($"{i},{j}");
+                    //Console.WriteLine($"{i},{j}");
                 }
             }
         }

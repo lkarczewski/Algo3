@@ -137,26 +137,6 @@ namespace Algo3
             return currentMaxRowIndex;
         }
 
-        public int[] FindMax(int selected)
-        {
-            var currentMaxIndex = new int[] { selected, selected };
-            var currentMax = this[selected, selected];
-
-            for (var i = selected; i < Rows(); i++)
-            {
-                for (var j = selected; j < Columns(); j++)
-                {
-                    if (this[i, j] > (dynamic)currentMax || this[i, j] < -(dynamic)currentMax)
-                    {
-                        currentMax = this[i, j];
-                        currentMaxIndex = new int[] { i, j };
-                    }
-                }
-            }
-
-            return currentMaxIndex;
-        }
-
         public void ChoosePartialPivot(T[] vector, int selected)
         {
             var maxRow = FindMaxInColumn(selected);
@@ -203,34 +183,7 @@ namespace Algo3
                     {
                         continue;
                     }
-                       
-                    ReduceRow(vector, selected, current);
-                }
-            }
-        }
 
-        public void LeftBottomTriangleFullPivot(T[] vector, int[] columnOrder)
-        {
-            //wybranie rzędu do redukowania rzędów poniżej
-            for (var selected = 0; selected < Rows() - 1; selected++)
-            {
-                var max = FindMax(selected);
-
-                //zamiana kolumn
-                var tempOrd = columnOrder[selected];
-                columnOrder[selected] = columnOrder[max[1]];
-                columnOrder[max[1]] = tempOrd;
-                SwapColumn(selected, max[1]);
-
-                //zamiana rzędu i wektora
-                var temp = vector[selected];
-                vector[selected] = vector[max[0]];
-                vector[max[0]] = temp;
-                SwapRow(selected, max[0]);
-
-                //redukowanie rzędów poniżej
-                for (var current = selected + 1; current < Rows(); current++)
-                {
                     ReduceRow(vector, selected, current);
                 }
             }
@@ -374,7 +327,7 @@ namespace Algo3
                     xVector[row] = (dynamic)Approximate(bVector, xVector, row);
                 }
 
-                enoughAccurracy = Math.Abs(VectorNorm(xVector, xVectorFromPreviousIteration)) <= accuracy / 10;
+                enoughAccurracy = Math.Abs(VectorNorm(xVector, xVectorFromPreviousIteration)) <= accuracy;
                 iterations++;
             }
 
@@ -402,7 +355,7 @@ namespace Algo3
                     xVector[row] = (dynamic)Approximate(bVector, xVectorPrevious, row);
                 }
 
-                enoughAccurracy = Math.Abs(VectorNorm(xVector, xVectorFromPreviousIteration)) <= accuracy / 10;
+                enoughAccurracy = Math.Abs(VectorNorm(xVector, xVectorFromPreviousIteration)) <= accuracy;
                 iterations++;
             }
 

@@ -11,8 +11,15 @@ namespace Algo3
         static void Main(string[] args)
         {
             Test t = new Test();
-            t.GaussPartialPivotTimeTest(30, 1);
-            t.GaussPartialPivotSparseTimeTest(30, 1);
+            t.GaussPartialPivotSparseMonteCarloTest(8);
+            //t.GaussPartialPivotTimeTest(30, 1);
+            //t.GaussPartialPivotSparseTimeTest(30, 1);
+            //t.JacobiTimeTest(30, 1, 1e-6);
+            //t.JacobiTimeTest(30, 1, 1e-10);
+            //t.JacobiTimeTest(30, 1, 1e-14);
+            //t.SeidelTimeTest(30, 1, 1e-6);
+            //t.SeidelTimeTest(30, 1, 1e-10);
+            //t.SeidelTimeTest(30, 1, 1e-14);
 
             //double[,] test = new double[3, 3] { { 8, -2, 3 }, { 2, 3, -1 }, { 5, -2, 7 } };
             //double[] vector = new double[] { 28.6, 12.12, 36.95 };
@@ -57,20 +64,18 @@ namespace Algo3
             //Console.WriteLine("Wygrane:" + win);
             //Console.WriteLine("Przegrane:" + loose);
 
-            //MatrixGenerator mg = new MatrixGenerator(15);
+            //MatrixGenerator mg = new MatrixGenerator(6);
             //MyMatrix<double> macierz = new MyMatrix<double>(mg.size, mg.size);
             //double[] wektor = new double[mg.size];
 
             //macierz = mg.GenerateMatrix();
             //wektor = t.GenerateVector(mg.size);
 
-            //Console.WriteLine(macierz.SeidelAccuracy(wektor, 1e-6));
-
-            //macierz.PrintMatrix();
-            //macierz.GaussPartialPivot(wektor);
-            //Console.WriteLine();
-            //macierz.PrintMatrix();
-            //Console.WriteLine();
+            ////macierz.PrintMatrix();
+            //macierz.GaussPartialPivotSparse(wektor);
+            ////Console.WriteLine();
+            ////macierz.PrintMatrix();
+            ////Console.WriteLine();
             //t.PrintVector(wektor);
         }
     }
