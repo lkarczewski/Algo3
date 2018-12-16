@@ -84,10 +84,8 @@ namespace Algo3
             wektor = GenerateVector(mg.size);
 
             macierz.GaussPartialPivot(wektor);
-            PrintVector(wektor);
             vectorProbability = GetProbabilityFromVector(wektor, monteCarloProbability);
             absoluteError = AbsoluteError(monteCarloProbability, vectorProbability);
-            Console.WriteLine("Błąd bezwzględny: " + absoluteError);
 
             StreamWriter writer = new StreamWriter("MonteCarloGaussPartialPivot.csv", append: true);
             if (writer != null)
@@ -129,10 +127,8 @@ namespace Algo3
             wektor = GenerateVector(mg.size);
 
             macierz.GaussPartialPivotSparse(wektor);
-            PrintVector(wektor);
             vectorProbability = GetProbabilityFromVector(wektor,monteCarloProbability);
             absoluteError = AbsoluteError(monteCarloProbability, vectorProbability);
-            Console.WriteLine("Błąd bezwzględny: " + absoluteError);
 
             StreamWriter writer = new StreamWriter("MonteCarloGaussPartialPivotSparse.csv", append: true);
             if (writer != null)
@@ -144,7 +140,7 @@ namespace Algo3
             Console.WriteLine("Błąd bezwzględny GaussPartialPivotSparse: " + absoluteError);
         }
 
-        public void JacobiMonteCarloTest(int numberOfAgents, int accuracy)
+        public void JacobiMonteCarloTest(int numberOfAgents, double accuracy)
         {
             MonteCarloClass mc = new MonteCarloClass();
             double win = 0.0;
@@ -174,10 +170,8 @@ namespace Algo3
             wektor = GenerateVector(mg.size);
 
             macierz.JacobiAccuracy(wektor,accuracy);
-            PrintVector(wektor);
             vectorProbability = GetProbabilityFromVector(wektor, monteCarloProbability);
             absoluteError = AbsoluteError(monteCarloProbability, vectorProbability);
-            Console.WriteLine("Błąd bezwzględny: " + absoluteError);
 
             string name = "MonteCarloJacobi" + accuracy + ".csv";
             StreamWriter writer = new StreamWriter(name, append: true);
@@ -190,7 +184,7 @@ namespace Algo3
             Console.WriteLine("Błąd bezwzględny Jacobi" + accuracy + ": " + absoluteError);
         }
 
-        public void SeidelMonteCarloTest(int numberOfAgents, int accuracy)
+        public void SeidelMonteCarloTest(int numberOfAgents, double accuracy)
         {
             MonteCarloClass mc = new MonteCarloClass();
             double win = 0.0;
@@ -220,10 +214,8 @@ namespace Algo3
             wektor = GenerateVector(mg.size);
 
             macierz.SeidelAccuracy(wektor, accuracy);
-            PrintVector(wektor);
             vectorProbability = GetProbabilityFromVector(wektor, monteCarloProbability);
             absoluteError = AbsoluteError(monteCarloProbability, vectorProbability);
-            Console.WriteLine("Błąd bezwzględny: " + absoluteError);
 
             string name = "MonteCarloSeidel" + accuracy + ".csv";
             StreamWriter writer = new StreamWriter(name, append: true);
@@ -248,7 +240,8 @@ namespace Algo3
             //przygotowanie macierzy i wektorów
             macierz = mg.GenerateMatrix();
             macierzKopia = mg.GenerateMatrix();
-            wektor = wektorKopia = GenerateVector(mg.size);
+            wektor = GenerateVector(mg.size);
+            wektorKopia = GenerateVector(mg.size);
 
             //liczenie czasu
             double[] czasy = new double[count];
@@ -276,14 +269,14 @@ namespace Algo3
 
             srednia = suma / count;
 
-            StreamWriter writer = new StreamWriter("CzasGaussPartialPivotSparse.csv", append: true);
+            StreamWriter writer = new StreamWriter("CzasGaussPartialPivot.csv", append: true);
             if (writer != null)
             {
                 writer.WriteLine(String.Format(numberOfAgents + ";" + srednia + ";"));
             }
             writer.Close();
 
-            Console.WriteLine("Średni czas GaussPartialPivotSparse: " + srednia + "ms");
+            Console.WriteLine("Średni czas GaussPartialPivot: " + srednia + "ms");
         }
 
         public void GaussPartialPivotSparseTimeTest(int numberOfAgents, int count)
@@ -298,7 +291,8 @@ namespace Algo3
             //przygotowanie macierzy i wektorów
             macierz = mg.GenerateMatrix();
             macierzKopia = mg.GenerateMatrix();
-            wektor = wektorKopia = GenerateVector(mg.size);
+            wektor = GenerateVector(mg.size);
+            wektorKopia = GenerateVector(mg.size);
 
             //liczenie czasu
             double[] czasy = new double[count];
@@ -420,6 +414,210 @@ namespace Algo3
             writer.Close();
 
             Console.WriteLine("Średni czas Seidel " + accuracy + ": " + srednia + "ms");
+        }
+
+        public void GaussPartialPivotAccuracyTest(int numberOfAgents, int count)
+        {
+            MatrixGenerator mg = new MatrixGenerator(numberOfAgents);
+
+            MyMatrix<double> macierzA = new MyMatrix<double>(mg.size, mg.size);
+            double[] wektorB = new double[mg.size];
+            double[] wektorBPrim = new double[mg.size];
+            double[] wektorBPrimKopia = new double[mg.size];
+            double[] wektorX = new double[mg.size];
+            double[] wektorXkopia = new double[mg.size];
+            double[] wektorNormy = new double[mg.size];
+
+            double norma = 0.0;
+
+            //przygotowanie macierzy i wektorów
+            macierzA = mg.GenerateMatrix();
+            wektorB = GenerateVector(mg.size);
+
+            //obliczanie wektora X
+            macierzA.GaussPartialPivot(wektorB);
+            for (var j = 0; j < wektorX.Length; j++)
+            {
+                wektorX[j] = wektorB[j];
+            }
+
+            //przywracanie macierzy i wektora
+            macierzA = mg.GenerateMatrix();
+            wektorB = GenerateVector(mg.size);
+
+            //liczenie wektora BPrim
+            for (var j = 0; j < macierzA.Rows(); j++)
+            {
+                for (var k = 0; k < macierzA.Columns(); k++)
+                {
+                    wektorBPrim[j] += macierzA[j, k] * wektorX[k];
+                }
+            }
+            norma += MyMatrix<double>.VectorNorm(wektorBPrim, wektorB);
+
+            StreamWriter writer = new StreamWriter("NormaGaussPartialPivot.csv", append: true);
+            if (writer != null)
+            {
+                writer.WriteLine(String.Format(numberOfAgents + ";" + norma));
+            }
+            writer.Close();
+
+            Console.WriteLine("GAUSS PARTIAL PIVOT: " + mg.size);
+            Console.WriteLine("Norma: " + norma);
+        }
+
+        public void GaussPartialPivotSparseAccuracyTest(int numberOfAgents, int count)
+        {
+            MatrixGenerator mg = new MatrixGenerator(numberOfAgents);
+
+            MyMatrix<double> macierzA = new MyMatrix<double>(mg.size, mg.size);
+            double[] wektorB = new double[mg.size];
+            double[] wektorBPrim = new double[mg.size];
+            double[] wektorBPrimKopia = new double[mg.size];
+            double[] wektorX = new double[mg.size];
+            double[] wektorXkopia = new double[mg.size];
+            double[] wektorNormy = new double[mg.size];
+
+            double norma = 0.0;
+
+            //przygotowanie macierzy i wektorów
+            macierzA = mg.GenerateMatrix();
+            wektorB = GenerateVector(mg.size);
+
+            //obliczanie wektora X
+            macierzA.GaussPartialPivotSparse(wektorB);
+            for (var j = 0; j < wektorX.Length; j++)
+            {
+                wektorX[j] = wektorB[j];
+            }
+
+            //przywracanie macierzy i wektora
+            macierzA = mg.GenerateMatrix();
+            wektorB = GenerateVector(mg.size);
+
+            //liczenie wektora BPrim
+            for (var j = 0; j < macierzA.Rows(); j++)
+            {
+                for (var k = 0; k < macierzA.Columns(); k++)
+                {
+                    wektorBPrim[j] += macierzA[j, k] * wektorX[k];
+                }
+            }
+            norma += MyMatrix<double>.VectorNorm(wektorBPrim, wektorB);
+
+            StreamWriter writer = new StreamWriter("NormaGaussPartialPivotSparse.csv", append: true);
+            if (writer != null)
+            {
+                writer.WriteLine(String.Format(numberOfAgents + ";" + norma));
+            }
+            writer.Close();
+
+            Console.WriteLine("GAUSS PARTIAL PIVOT SPARSE: " + mg.size);
+            Console.WriteLine("Norma: " + norma);
+        }
+
+        public void JacobiAccuracyTest(int numberOfAgents, double accuracy,int count)
+        {
+            MatrixGenerator mg = new MatrixGenerator(numberOfAgents);
+
+            MyMatrix<double> macierzA = new MyMatrix<double>(mg.size, mg.size);
+            double[] wektorB = new double[mg.size];
+            double[] wektorBPrim = new double[mg.size];
+            double[] wektorBPrimKopia = new double[mg.size];
+            double[] wektorX = new double[mg.size];
+            double[] wektorXkopia = new double[mg.size];
+            double[] wektorNormy = new double[mg.size];
+
+            double norma = 0.0;
+
+            //przygotowanie macierzy i wektorów
+            macierzA = mg.GenerateMatrix();
+            wektorB = GenerateVector(mg.size);
+
+            //obliczanie wektora X
+            macierzA.JacobiAccuracy(wektorB, accuracy);
+            for (var j = 0; j < wektorX.Length; j++)
+            {
+                wektorX[j] = wektorB[j];
+            }
+
+            //przywracanie macierzy i wektora
+            macierzA = mg.GenerateMatrix();
+            wektorB = GenerateVector(mg.size);
+
+            //liczenie wektora BPrim
+            for (var j = 0; j < macierzA.Rows(); j++)
+            {
+                for (var k = 0; k < macierzA.Columns(); k++)
+                {
+                    wektorBPrim[j] += macierzA[j, k] * wektorX[k];
+                }
+            }
+            norma += MyMatrix<double>.VectorNorm(wektorBPrim, wektorB);
+
+            string name = "NormaJacobi" + accuracy + ".csv";
+
+            StreamWriter writer = new StreamWriter(name, append: true);
+            if (writer != null)
+            {
+                writer.WriteLine(String.Format(numberOfAgents + ";" + norma));
+            }
+            writer.Close();
+
+            Console.WriteLine("JACOBI " + accuracy);
+            Console.WriteLine("Norma: " + norma);
+        }
+
+        public void SeidelAccuracyTest(int numberOfAgents, double accuracy, int count)
+        {
+            MatrixGenerator mg = new MatrixGenerator(numberOfAgents);
+
+            MyMatrix<double> macierzA = new MyMatrix<double>(mg.size, mg.size);
+            double[] wektorB = new double[mg.size];
+            double[] wektorBPrim = new double[mg.size];
+            double[] wektorBPrimKopia = new double[mg.size];
+            double[] wektorX = new double[mg.size];
+            double[] wektorXkopia = new double[mg.size];
+            double[] wektorNormy = new double[mg.size];
+
+            double norma = 0.0;
+
+            //przygotowanie macierzy i wektorów
+            macierzA = mg.GenerateMatrix();
+            wektorB = GenerateVector(mg.size);
+
+            //obliczanie wektora X
+            macierzA.SeidelAccuracy(wektorB, accuracy);
+            for (var j = 0; j < wektorX.Length; j++)
+            {
+                wektorX[j] = wektorB[j];
+            }
+
+            //przywracanie macierzy i wektora
+            macierzA = mg.GenerateMatrix();
+            wektorB = GenerateVector(mg.size);
+
+            //liczenie wektora BPrim
+            for (var j = 0; j < macierzA.Rows(); j++)
+            {
+                for (var k = 0; k < macierzA.Columns(); k++)
+                {
+                    wektorBPrim[j] += macierzA[j, k] * wektorX[k];
+                }
+            }
+            norma += MyMatrix<double>.VectorNorm(wektorBPrim, wektorB);
+
+            string name = "NormaSeidel" + accuracy + ".csv";
+
+            StreamWriter writer = new StreamWriter(name, append: true);
+            if (writer != null)
+            {
+                writer.WriteLine(String.Format(numberOfAgents + ";" + norma));
+            }
+            writer.Close();
+
+            Console.WriteLine("Seidel " + accuracy);
+            Console.WriteLine("Norma: " + norma);
         }
     }
 }
